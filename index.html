@@ -75,10 +75,9 @@
             videoDiv.addEventListener('click', () => {
                 const iframes = document.querySelectorAll('iframe');
                 iframes.forEach(frame => {
-                    if (frame !== iframe) {
-                        const currentSrc = frame.src;
-                        frame.src = '';
-                        frame.src = currentSrc;
+                    if (frame !== iframe && frame.src.includes("instagram.com")) {
+                        const originalSrc = frame.src.split('&dummy=')[0];
+                        frame.src = originalSrc + '&dummy=' + Date.now();
                     }
                 });
             });
