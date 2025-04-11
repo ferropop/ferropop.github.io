@@ -33,15 +33,12 @@
       overflow: hidden;
       background-color: white;
       cursor: pointer;
-      height: 600px; /* Force container height to avoid scroll inside iframe */
     }
     .video iframe {
       width: 100%;
-      height: 100%;
+      aspect-ratio: 4 / 5;
       border: none;
       display: block;
-      overflow: hidden;
-      scrolling: no;
     }
     @media (min-width: 800px) {
       .video {
@@ -53,6 +50,9 @@
 <body>
 
   <div class="carousel" id="video-carousel"></div>
+
+  <!-- Instagram embed.js for auto-resizing support -->
+  <script async src="https://www.instagram.com/embed.js"></script>
 
   <script>
     const instagramLinks = [
@@ -74,7 +74,7 @@
       iframe.src = link;
       iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
       iframe.loading = "lazy";
-      iframe.scrolling = "no";
+      iframe.setAttribute("allowfullscreen", "true");
 
       videoDiv.appendChild(iframe);
       carousel.appendChild(videoDiv);
@@ -87,6 +87,13 @@
         carousel.scrollLeft += e.deltaY;
       }
     }, { passive: false });
+
+    // Trigger Instagram's JS after embeds are loaded
+    window.addEventListener('load', () => {
+      if (window.instgrm && instgrm.Embeds) {
+        instgrm.Embeds.process();
+      }
+    });
   </script>
 
 </body>
