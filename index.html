@@ -6,11 +6,10 @@
   <title>Instagram Video Carousel</title>
   <style>
     * { box-sizing: border-box; }
-
     html, body {
       margin: 0;
       padding: 0;
-      height: 100vh;               /* Fill exactly one viewport height */
+      height: 100vh;               /* fill the viewport */
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       display: flex;
@@ -20,7 +19,7 @@
       padding: 20px;
     }
 
-    /* ——— Header ——— */
+    /* —— Header —— */
     .copy-header {
       text-align: center;
       margin-bottom: 20px;
@@ -31,7 +30,7 @@
       user-select: none;
     }
 
-    /* ——— Tooltip ——— */
+    /* —— Tooltip —— */
     #tooltip {
       position: fixed;
       background: rgba(0,0,0,0.8);
@@ -46,14 +45,14 @@
       white-space: nowrap;
     }
 
-    /* ——— Vertical carousel ——— */
+    /* —— Vertical carousel —— */
     .carousel {
-      flex: 1;                     /* Fill remaining space below header */
+      flex: 1;                     /* fill space under header */
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow-y: auto;
-      gap: 0;                      /* No extra gap—peek comes from partial next video */
+      gap: 20px;                   /* peek between slides */
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
@@ -61,21 +60,15 @@
       display: none;
     }
 
-    /* ——— Video frames sized so 1.5 fit vertically ——— */
+    /* —— Video frames —— */
     .video {
-      width: 80%;
-      height: calc(100vh / 1.5);   /* 100vh divided by 1.5 → each is ~66.67vh */
+      width: 80%;                  /* adjust width as before */
       margin: 0 auto;
       background-color: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    .video:first-child {
-      margin-top: 0;
-    }
-    .video:last-child {
-      margin-bottom: 0;
+      height: auto;                /* will be set by JS */
     }
     @media (min-width: 800px) {
       .video {
@@ -92,7 +85,7 @@
 </head>
 <body>
 
-  <!-- 1) Centered copy header -->
+  <!-- 1) Header -->
   <div class="copy-header">
     <span id="copy-ferro">ＦＥＲＲＯ</span>
   </div>
@@ -100,13 +93,13 @@
   <!-- 2) Tooltip -->
   <div id="tooltip">Click to Copy to Clipboard</div>
 
-  <!-- 3) Vertical carousel -->
+  <!-- 3) Carousel -->
   <div class="carousel" id="video-carousel"></div>
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
   <script>
-    // Populate the carousel
+    // 1) Populate the carousel
     const instagramLinks = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -117,25 +110,51 @@
     ];
     const carousel = document.getElementById('video-carousel');
     instagramLinks.forEach(url => {
-      const container = document.createElement('div');
-      container.className = 'video';
+      const slide = document.createElement('div');
+      slide.className = 'video';
       const iframe = document.createElement('iframe');
       iframe.src = url;
       iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
       iframe.loading = "lazy";
       iframe.setAttribute("allowfullscreen", "true");
-      container.appendChild(iframe);
-      carousel.appendChild(container);
+      slide.appendChild(iframe);
+      carousel.appendChild(slide);
     });
 
-    // Process Instagram embeds on load
+    // 2) Once embeds load, recalc sizes
+    function resizeSlides() {
+      // Compute how much vertical space is available
+      const headerEl = document.querySelector('.copy-header');
+      const headerHeight = headerEl.offsetHeight + 
+        parseFloat(getComputedStyle(headerEl).marginBottom);
+      const bodyStyle = getComputedStyle(document.body);
+      const bodyPadTop  = parseFloat(bodyStyle.paddingTop);
+      const bodyPadBot  = parseFloat(bodyStyle.paddingBottom);
+
+      const availHeight = window.innerHeight
+        - headerHeight
+        - bodyPadTop
+        - bodyPadBot;
+
+      // We want 1.5 slides in that space:
+      const slideHeight = availHeight / 1.5;
+
+      document.querySelectorAll('.video').forEach(slide => {
+        slide.style.height = slideHeight + 'px';
+      });
+    }
+
     window.addEventListener('load', () => {
+      // Process Instagram embeds
       if (window.instgrm && instgrm.Embeds) {
         instgrm.Embeds.process();
       }
+      // Then size slides
+      resizeSlides();
     });
+    window.addEventListener('resize', resizeSlides);
 
-    // Copy-to-clipboard + tooltip
+    // 3) Copy-to-clipboard + tooltip
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -146,7 +165,7 @@
       ta.remove();
     }
     const copyEl = document.getElementById('copy-ferro');
-    const tooltip = document.getElementById('tooltip');
+    const tip    = document.getElementById('tooltip');
 
     copyEl.addEventListener('click', () => {
       const txt = 'ＦＥＲＲＯ';
@@ -157,16 +176,15 @@
       }
     });
     copyEl.addEventListener('mouseenter', () => {
-      tooltip.style.opacity = '1';
+      tip.style.opacity = '1';
     });
     copyEl.addEventListener('mousemove', e => {
-      tooltip.style.top = (e.clientY + 10) + 'px';
-      tooltip.style.left = (e.clientX + 10) + 'px';
+      tip.style.top  = (e.clientY + 10) + 'px';
+      tip.style.left = (e.clientX + 10) + 'px';
     });
     copyEl.addEventListener('mouseleave', () => {
-      tooltip.style.opacity = '0';
+      tip.style.opacity = '0';
     });
   </script>
-
 </body>
 </html>
