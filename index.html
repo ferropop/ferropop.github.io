@@ -45,33 +45,27 @@
       white-space: nowrap;
     }
 
-    /* —— VERTICAL CAROUSEL —— */
+    /* —— CAROUSEL —— */
     .carousel {
-      flex: 1;                   /* fill remaining space */
+      flex: 1;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
       align-items: center;
+      overflow-y: auto;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
     .carousel::-webkit-scrollbar { display: none; }
 
-    /* —— VIDEO PANELS —— */
+    /* —— VIDEO WRAPPERS —— */
     .video {
       width: 80%;
-      height: 85%;              /* 85% of the carousel height */
-      margin: 7.5% 0;           /* peek = (100 - 85)/2 above & below */
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      cursor: pointer;
+      position: relative;
     }
-    /* No blank above the first, nor below the last */
-    .video:first-child { margin-top: 0; }
-    .video:last-child  { margin-bottom: 0; }
-
     @media (min-width: 800px) {
       .video { width: 40%; }
     }
@@ -90,16 +84,16 @@
     <span id="copy-ferro">ＦＥＲＲＯ</span>
   </div>
 
-  <!-- Tooltip -->
+  <!-- 2) Tooltip -->
   <div id="tooltip">Click to Copy to Clipboard</div>
 
-  <!-- 2) Vertical carousel -->
+  <!-- 3) Vertical carousel container -->
   <div class="carousel" id="video-carousel"></div>
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
   <script>
-    // —— Populate the carousel —— 
+    // —— Populate carousel —— 
     const links = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -121,12 +115,14 @@
       carousel.appendChild(v);
     });
 
-    // —— Process Instagram embeds —— 
+    // —— Process Instagram embeds once loaded —— 
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) instgrm.Embeds.process();
+      resizeCarousel();
     });
+    window.addEventListener('resize', resizeCarousel);
 
-    // —— Copy-to-clipboard —— 
+    // —— Copy-to-clipboard + Tooltip —— 
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -137,25 +133,46 @@
       ta.remove();
     }
     const copyEl = document.getElementById('copy-ferro');
+    const tip    = document.getElementById('tooltip');
     copyEl.addEventListener('click', () => {
       const txt = 'ＦＥＲＲＯ';
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(txt)
-          .catch(() => fallbackCopy(txt));
+        navigator.clipboard.writeText(txt).catch(() => fallbackCopy(txt));
       } else {
         fallbackCopy(txt);
       }
     });
-
-    // —— Tooltip —— 
-    const tip = document.getElementById('tooltip');
     copyEl.addEventListener('mouseenter', () => tip.style.opacity = '1');
     copyEl.addEventListener('mousemove', e => {
-      tip.style.top  = `${e.clientY + 10}px`;
-      tip.style.left = `${e.clientX + 10}px`;
+      tip.style.top  = (e.clientY + 10) + 'px';
+      tip.style.left = (e.clientX + 10) + 'px';
     });
     copyEl.addEventListener('mouseleave', () => tip.style.opacity = '0');
-  </script>
 
+    // —— Resize logic —— 
+    function resizeCarousel() {
+      const header = document.querySelector('.copy-header');
+      const headerRect = header.getBoundingClientRect();
+      const headerMB   = parseFloat(getComputedStyle(header).marginBottom);
+      const totalHeader = headerRect.height + headerMB;
+
+      const bodyStyle = getComputedStyle(document.body);
+      const padTop    = parseFloat(bodyStyle.paddingTop);
+      const padBot    = parseFloat(bodyStyle.paddingBottom);
+
+      // available height for carousel
+      const availH = window.innerHeight - totalHeader - padTop - padBot;
+      carousel.style.height = availH + 'px';
+
+      const videos = document.querySelectorAll('.video');
+      videos.forEach((v, i) => {
+        const vh85 = availH * 0.85;
+        const peek = (availH - vh85) / 2;
+        v.style.height       = vh85 + 'px';
+        v.style.marginTop    = (i === 0 ? 0 : peek) + 'px';
+        v.style.marginBottom = (i === videos.length - 1 ? 0 : peek) + 'px';
+      });
+    }
+  </script>
 </body>
 </html>
