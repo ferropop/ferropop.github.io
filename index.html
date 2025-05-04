@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Instagram Video Carousel</title>
   <style>
-    * { box-sizing: border-box; }
-
+    * {
+      box-sizing: border-box;
+    }
     html, body {
       margin: 0;
       padding: 0;
-      height: 800vh;
+      height: 100vh;               /* fill the viewport */
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       display: flex;
       flex-direction: column;
     }
-
     body {
       padding: 20px;
     }
 
-    /* —— Centered FERRO header —— */
+    /* ——— Centered header ——— */
     .copy-header {
       text-align: center;
       margin-bottom: 20px;
@@ -32,7 +32,7 @@
       user-select: none;
     }
 
-    /* —— Tooltip —— */
+    /* ——— Tooltip ——— */
     #tooltip {
       position: fixed;
       background: rgba(0,0,0,0.8);
@@ -47,34 +47,45 @@
       white-space: nowrap;
     }
 
-    /* —— Vertical carousel —— */
+    /* ——— Vertical carousel ——— */
     .carousel {
-      flex: 1;                        /* fill remaining space under header */
+      flex: 1;                     /* fill remaining space under header */
       display: flex;
       flex-direction: column;
       align-items: center;
       overflow-y: auto;
-      gap: 20px;                      /* space between slides = peek */
-      -ms-overflow-style: none;      
-      scrollbar-width: none;         
+      gap: 20px;                   /* space between slides = peek */
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
-    .carousel::-webkit-scrollbar { display: none; }
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
 
-    /* —— Each video wrapper just wraps its iframe —— */
+    /* ——— Video frames ——— */
     .video {
-      width: 80%;                     /* control width only */
-      margin: 0;                      /* gap is handled by carousel’s gap */
+      width: 80%;                  /* control width */
+      height: 85vh;                /* each frame = 85% of viewport height */
+      margin: 7.5vh 0;             /* (100 - 85) / 2 top & bottom for peeks */
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    .video:first-child {
+      margin-top: 0;               /* no blank above first */
+    }
+    .video:last-child {
+      margin-bottom: 0;            /* no blank below last */
+    }
     @media (min-width: 800px) {
-      .video { width: 40%; }
+      .video {
+        width: 40%;
+      }
     }
     .video iframe {
       width: 100%;
-      height: auto;                   /* preserve the iframe’s intrinsic ratio */
+      height: 100%;
       border: none;
       display: block;
     }
@@ -82,7 +93,7 @@
 </head>
 <body>
 
-  <!-- 1) FERRO header -->
+  <!-- 1) Centered FERRO header -->
   <div class="copy-header">
     <span id="copy-ferro">ＦＥＲＲＯ</span>
   </div>
@@ -97,7 +108,7 @@
   <script async src="https://www.instagram.com/embed.js"></script>
   <script>
     // Populate the carousel
-    const links = [
+    const instagramLinks = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DAPDdkuSSQe/embed/?utm_source=ig_embed",
@@ -106,26 +117,26 @@
       "https://www.instagram.com/p/C8DjEvjAU3e/embed/?utm_source=ig_embed"
     ];
     const carousel = document.getElementById('video-carousel');
-    links.forEach(url => {
-      const v = document.createElement('div');
-      v.className = 'video';
-      const ifr = document.createElement('iframe');
-      ifr.src = url;
-      ifr.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
-      ifr.loading = "lazy";
-      ifr.setAttribute("allowfullscreen","true");
-      v.appendChild(ifr);
-      carousel.appendChild(v);
+    instagramLinks.forEach(url => {
+      const container = document.createElement('div');
+      container.className = 'video';
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
+      iframe.loading = "lazy";
+      iframe.setAttribute("allowfullscreen", "true");
+      container.appendChild(iframe);
+      carousel.appendChild(container);
     });
 
-    // Process Instagram embeds
+    // Process Instagram embeds on load
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) {
         instgrm.Embeds.process();
       }
     });
 
-    // Copy-to-clipboard with tooltip
+    // Copy-to-clipboard + tooltip
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -136,7 +147,7 @@
       ta.remove();
     }
     const copyEl = document.getElementById('copy-ferro');
-    const tip    = document.getElementById('tooltip');
+    const tooltip = document.getElementById('tooltip');
 
     copyEl.addEventListener('click', () => {
       const txt = 'ＦＥＲＲＯ';
@@ -146,12 +157,17 @@
         fallbackCopy(txt);
       }
     });
-    copyEl.addEventListener('mouseenter', () => tip.style.opacity = '1');
-    copyEl.addEventListener('mousemove', e => {
-      tip.style.top  = e.clientY + 10 + 'px';
-      tip.style.left = e.clientX + 10 + 'px';
+    copyEl.addEventListener('mouseenter', () => {
+      tooltip.style.opacity = '1';
     });
-    copyEl.addEventListener('mouseleave', () => tip.style.opacity = '0');
+    copyEl.addEventListener('mousemove', e => {
+      tooltip.style.top = (e.clientY + 10) + 'px';
+      tooltip.style.left = (e.clientX + 10) + 'px';
+    });
+    copyEl.addEventListener('mouseleave', () => {
+      tooltip.style.opacity = '0';
+    });
   </script>
+
 </body>
 </html>
