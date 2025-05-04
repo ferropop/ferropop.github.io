@@ -14,9 +14,9 @@
       background: #f5f5f5;
     }
     body {
-      padding: 20px;
       display: flex;
       flex-direction: column;
+      padding: 20px;
     }
 
     /* —— HEADER —— */
@@ -47,12 +47,11 @@
 
     /* —— VERTICAL CAROUSEL —— */
     .carousel {
-      flex: 1;
-      overflow-y: auto;
+      flex: 1;                   /* fill remaining space */
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
       align-items: center;
-      /* no extra gap—margins on .video handle the peek */
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
@@ -61,14 +60,18 @@
     /* —— VIDEO PANELS —— */
     .video {
       width: 80%;
-      height: 85vh;           /* each video = 85% of the viewport height */
-      margin: 7.5vh 0;        /* peek: top & bottom margins = (100 - 85)/2 */
+      height: 85%;              /* 85% of the carousel height */
+      margin: 7.5% 0;           /* peek = (100 - 85)/2 above & below */
       background: white;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       cursor: pointer;
     }
+    /* No blank above the first, nor below the last */
+    .video:first-child { margin-top: 0; }
+    .video:last-child  { margin-bottom: 0; }
+
     @media (min-width: 800px) {
       .video { width: 40%; }
     }
@@ -95,9 +98,8 @@
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
-
   <script>
-    // —— Populate carousel —— 
+    // —— Populate the carousel —— 
     const links = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -119,7 +121,7 @@
       carousel.appendChild(v);
     });
 
-    // —— Insta embeds —— 
+    // —— Process Instagram embeds —— 
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) instgrm.Embeds.process();
     });
@@ -138,7 +140,8 @@
     copyEl.addEventListener('click', () => {
       const txt = 'ＦＥＲＲＯ';
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(txt).catch(() => fallbackCopy(txt));
+        navigator.clipboard.writeText(txt)
+          .catch(() => fallbackCopy(txt));
       } else {
         fallbackCopy(txt);
       }
