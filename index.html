@@ -11,7 +11,7 @@
       padding: 0;
       height: 100%;
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
+      background: #f5f5f5;
     }
     body {
       padding: 20px;
@@ -21,12 +21,10 @@
 
     /* —— HEADER —— */
     .copy-header {
-      height: 50px;              /* fixed header height */
-      margin-bottom: 20px;
       text-align: center;
+      margin-bottom: 20px;
     }
     #copy-ferro {
-      line-height: 50px;         /* vertically center */
       font-size: 24px;
       cursor: pointer;
       user-select: none;
@@ -35,42 +33,40 @@
     /* —— TOOLTIP —— */
     #tooltip {
       position: fixed;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0,0,0,0.8);
       color: #fff;
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 12px;
       pointer-events: none;
-      white-space: nowrap;
       opacity: 0;
       transition: opacity 0.05s;
       z-index: 9999;
+      white-space: nowrap;
     }
 
     /* —— VERTICAL CAROUSEL —— */
     .carousel {
-      flex: 1;                                           /* fill remaining space */
-      height: calc(100vh - 50px - 40px);                 /* 100vh minus header (50px) minus body padding top+bottom (20+20) */
+      flex: 1;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 20px;
+      /* no extra gap—margins on .video handle the peek */
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
     .carousel::-webkit-scrollbar { display: none; }
 
-    /* —— VIDEOS —— */
+    /* —— VIDEO PANELS —— */
     .video {
       width: 80%;
-      height: calc(100% - 40px);    /* container height minus peek margins */
-      margin: 20px 0;                /* 20px peek above + below */
-      position: relative;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      height: 85vh;           /* each video = 85% of the viewport height */
+      margin: 7.5vh 0;        /* peek: top & bottom margins = (100 - 85)/2 */
+      background: white;
       border-radius: 12px;
       overflow: hidden;
-      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       cursor: pointer;
     }
     @media (min-width: 800px) {
@@ -99,8 +95,9 @@
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
+
   <script>
-    // Populate carousel
+    // —— Populate carousel —— 
     const links = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -122,12 +119,12 @@
       carousel.appendChild(v);
     });
 
-    // Process Instagram embeds
+    // —— Insta embeds —— 
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) instgrm.Embeds.process();
     });
 
-    // Copy-to-clipboard
+    // —— Copy-to-clipboard —— 
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -147,12 +144,12 @@
       }
     });
 
-    // Tooltip
+    // —— Tooltip —— 
     const tip = document.getElementById('tooltip');
     copyEl.addEventListener('mouseenter', () => tip.style.opacity = '1');
     copyEl.addEventListener('mousemove', e => {
-      tip.style.top  = e.clientY + 10 + 'px';
-      tip.style.left = e.clientX + 10 + 'px';
+      tip.style.top  = `${e.clientY + 10}px`;
+      tip.style.left = `${e.clientX + 10}px`;
     });
     copyEl.addEventListener('mouseleave', () => tip.style.opacity = '0');
   </script>
