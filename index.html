@@ -14,6 +14,16 @@
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
     }
+
+    /* ——— New styles for the copy header ——— */
+    .copy-header {
+      margin-bottom: 20px;
+    }
+    #copy-ferro {
+      display: inline-block;
+      cursor: pointer;
+    }
+
     .carousel {
       display: flex;
       overflow-x: auto;
@@ -48,6 +58,11 @@
   </style>
 </head>
 <body>
+
+  <!-- ——— New copy header ——— -->
+  <div class="copy-header">
+    <span id="copy-ferro" title="Click to copy to clipboard">ＦＥＲＲＯ</span>
+  </div>
 
   <div class="carousel" id="video-carousel"></div>
 
@@ -92,6 +107,36 @@
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) {
         instgrm.Embeds.process();
+      }
+    });
+
+    // ——— Copy to clipboard logic ———
+    function fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";  // avoid scrolling
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+      document.body.removeChild(textArea);
+    }
+
+    const copyFerro = document.getElementById('copy-ferro');
+    copyFerro.addEventListener('click', () => {
+      const text = 'ＦＥＲＲＯ';
+      if (!navigator.clipboard) {
+        fallbackCopyTextToClipboard(text);
+      } else {
+        navigator.clipboard.writeText(text)
+          .catch(err => {
+            console.error('Async: Could not copy text: ', err);
+            fallbackCopyTextToClipboard(text);
+          });
       }
     });
   </script>
