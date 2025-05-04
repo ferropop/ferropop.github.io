@@ -7,19 +7,16 @@
   <style>
     * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       font-family: Arial, sans-serif;
       background: #f5f5f5;
     }
     body {
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       padding: 20px;
     }
 
-    /* —— HEADER —— */
+    /* HEADER */
     .copy-header {
       text-align: center;
       margin-bottom: 20px;
@@ -30,7 +27,7 @@
       user-select: none;
     }
 
-    /* —— TOOLTIP —— */
+    /* TOOLTIP */
     #tooltip {
       position: fixed;
       background: rgba(0,0,0,0.8);
@@ -45,7 +42,7 @@
       white-space: nowrap;
     }
 
-    /* —— CAROUSEL —— */
+    /* CAROUSEL */
     .carousel {
       flex: 1;
       display: flex;
@@ -57,7 +54,7 @@
     }
     .carousel::-webkit-scrollbar { display: none; }
 
-    /* —— VIDEO WRAPPERS —— */
+    /* VIDEO CONTAINERS */
     .video {
       width: 80%;
       background: white;
@@ -79,7 +76,7 @@
 </head>
 <body>
 
-  <!-- 1) Centered FERRO header -->
+  <!-- 1) FERRO header -->
   <div class="copy-header">
     <span id="copy-ferro">ＦＥＲＲＯ</span>
   </div>
@@ -87,13 +84,13 @@
   <!-- 2) Tooltip -->
   <div id="tooltip">Click to Copy to Clipboard</div>
 
-  <!-- 3) Vertical carousel container -->
+  <!-- 3) Carousel -->
   <div class="carousel" id="video-carousel"></div>
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
   <script>
-    // —— Populate carousel —— 
+    // Populate carousel
     const links = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -115,14 +112,25 @@
       carousel.appendChild(v);
     });
 
-    // —— Process Instagram embeds once loaded —— 
-    window.addEventListener('load', () => {
-      if (window.instgrm && instgrm.Embeds) instgrm.Embeds.process();
-      resizeCarousel();
-    });
-    window.addEventListener('resize', resizeCarousel);
+    // Resize logic
+    function resizeCarousel() {
+      const header = document.querySelector('.copy-header');
+      const hr = header.getBoundingClientRect().height;
+      const hb = parseFloat(getComputedStyle(header).marginBottom);
+      const availH = window.innerHeight - hr - hb;
+      carousel.style.height = availH + 'px';
 
-    // —— Copy-to-clipboard + Tooltip —— 
+      const videoH = availH * 0.85;
+      const peek   = (availH - videoH) / 2;
+
+      document.querySelectorAll('.video').forEach(v => {
+        v.style.height       = videoH + 'px';
+        v.style.marginTop    = peek + 'px';
+        v.style.marginBottom = peek + 'px';
+      });
+    }
+
+    // Clipboard & tooltip
     function fallbackCopy(text) {
       const ta = document.createElement('textarea');
       ta.value = text;
@@ -132,8 +140,9 @@
       document.execCommand('copy');
       ta.remove();
     }
-    const copyEl = document.getElementById('copy-ferro');
-    const tip    = document.getElementById('tooltip');
+    const copyEl = document.getElementById('copy-ferro'),
+          tip    = document.getElementById('tooltip');
+
     copyEl.addEventListener('click', () => {
       const txt = 'ＦＥＲＲＯ';
       if (navigator.clipboard) {
@@ -144,35 +153,17 @@
     });
     copyEl.addEventListener('mouseenter', () => tip.style.opacity = '1');
     copyEl.addEventListener('mousemove', e => {
-      tip.style.top  = (e.clientY + 10) + 'px';
-      tip.style.left = (e.clientX + 10) + 'px';
+      tip.style.top  = e.clientY + 10 + 'px';
+      tip.style.left = e.clientX + 10 + 'px';
     });
     copyEl.addEventListener('mouseleave', () => tip.style.opacity = '0');
 
-    // —— Resize logic —— 
-    function resizeCarousel() {
-      const header = document.querySelector('.copy-header');
-      const headerRect = header.getBoundingClientRect();
-      const headerMB   = parseFloat(getComputedStyle(header).marginBottom);
-      const totalHeader = headerRect.height + headerMB;
-
-      const bodyStyle = getComputedStyle(document.body);
-      const padTop    = parseFloat(bodyStyle.paddingTop);
-      const padBot    = parseFloat(bodyStyle.paddingBottom);
-
-      // available height for carousel
-      const availH = window.innerHeight - totalHeader - padTop - padBot;
-      carousel.style.height = availH + 'px';
-
-      const videos = document.querySelectorAll('.video');
-      videos.forEach((v, i) => {
-        const vh85 = availH * 0.85;
-        const peek = (availH - vh85) / 2;
-        v.style.height       = vh85 + 'px';
-        v.style.marginTop    = (i === 0 ? 0 : peek) + 'px';
-        v.style.marginBottom = (i === videos.length - 1 ? 0 : peek) + 'px';
-      });
-    }
+    // Insta embeds + initial resize
+    window.addEventListener('load', () => {
+      if (window.instgrm && instgrm.Embeds) instgrm.Embeds.process();
+      resizeCarousel();
+    });
+    window.addEventListener('resize', resizeCarousel);
   </script>
 </body>
 </html>
