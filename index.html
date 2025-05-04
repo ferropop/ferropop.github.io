@@ -8,16 +8,22 @@
     * {
       box-sizing: border-box;
     }
-    body {
+    html, body {
       margin: 0;
       padding: 20px;
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
     }
 
-    /* Header with the copy text */
+    /* 1) Centered header */
     .copy-header {
       margin-bottom: 20px;
+      text-align: center;
     }
     #copy-ferro {
       display: inline-block;
@@ -26,7 +32,7 @@
       user-select: none;
     }
 
-    /* Tooltip styling */
+    /* Tooltip */
     #tooltip {
       position: fixed;
       background: rgba(0, 0, 0, 0.8);
@@ -41,19 +47,25 @@
       z-index: 9999;
     }
 
+    /* 2) Vertical carousel */
     .carousel {
       display: flex;
-      overflow-x: auto;
-      padding-bottom: 10px;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
       gap: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
     .carousel::-webkit-scrollbar {
       display: none;
     }
+
     .video {
-      flex: 0 0 80%;
+      width: 80%;
+      /* height will be set by JS */
       position: relative;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       border-radius: 12px;
@@ -61,37 +73,37 @@
       background-color: white;
       cursor: pointer;
     }
-    .video iframe {
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      border: none;
-      display: block;
-    }
     @media (min-width: 800px) {
       .video {
-        flex: 0 0 40%;
+        width: 40%;
       }
+    }
+    .video iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
     }
   </style>
 </head>
 <body>
 
-  <!-- 1) Copy header -->
+  <!-- 1) Centered FERRO header -->
   <div class="copy-header">
     <span id="copy-ferro">ＦＥＲＲＯ</span>
   </div>
 
-  <!-- 2) Tooltip element -->
+  <!-- Tooltip -->
   <div id="tooltip">Click to Copy to Clipboard</div>
 
-  <!-- 3) Carousel container -->
+  <!-- 2) Vertical carousel container -->
   <div class="carousel" id="video-carousel"></div>
 
   <!-- Instagram embed.js -->
   <script async src="https://www.instagram.com/embed.js"></script>
 
   <script>
-    // —— Carousel setup —— 
+    // ——— Carousel setup ———
     const instagramLinks = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -117,22 +129,14 @@
       carousel.appendChild(videoDiv);
     });
 
-    // Vertical wheel scrolls horizontally
-    carousel.addEventListener('wheel', e => {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        carousel.scrollLeft += e.deltaY;
-      }
-    }, { passive: false });
-
-    // Instagram embed processing
+    // Process Instagram embeds
     window.addEventListener('load', () => {
       if (window.instgrm && instgrm.Embeds) {
         instgrm.Embeds.process();
       }
     });
 
-    // —— Copy-to-clipboard —— 
+    // ——— Copy-to-clipboard ———
     function fallbackCopyTextToClipboard(text) {
       const ta = document.createElement("textarea");
       ta.value = text;
@@ -156,7 +160,7 @@
       }
     });
 
-    // —— Tooltip logic —— 
+    // ——— Tooltip logic ———
     const tooltip = document.getElementById('tooltip');
     copyFerro.addEventListener('mouseenter', () => {
       tooltip.style.opacity = '1';
@@ -169,6 +173,44 @@
     copyFerro.addEventListener('mouseleave', () => {
       tooltip.style.opacity = '0';
     });
+
+    // ——— Resize carousel & videos for peek effect ———
+    function resizeVideos() {
+      const header = document.querySelector('.copy-header');
+      const bodyStyle = getComputedStyle(document.body);
+      const headerStyle = getComputedStyle(header);
+
+      const bodyPaddingTop = parseFloat(bodyStyle.paddingTop);
+      const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom);
+      const headerHeight = header.getBoundingClientRect().height
+                           + parseFloat(headerStyle.marginBottom);
+
+      // height available for carousel
+      const availableHeight = window.innerHeight
+                              - bodyPaddingTop
+                              - bodyPaddingBottom
+                              - headerHeight;
+
+      carousel.style.height = availableHeight + 'px';
+
+      const carouselStyle = getComputedStyle(carousel);
+      const gap         = parseFloat(carouselStyle.gap);
+      const paddingTop  = parseFloat(carouselStyle.paddingTop);
+      const paddingBot  = parseFloat(carouselStyle.paddingBottom);
+
+      // subtract one gap so you can peek the next video
+      const videoHeight = availableHeight
+                          - paddingTop
+                          - paddingBot
+                          - gap;
+
+      document.querySelectorAll('.video').forEach(v => {
+        v.style.height = videoHeight + 'px';
+      });
+    }
+
+    window.addEventListener('load', resizeVideos);
+    window.addEventListener('resize', resizeVideos);
   </script>
 
 </body>
