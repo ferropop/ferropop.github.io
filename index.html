@@ -3,88 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram Video Wall</title>
+  <title>Proper Instagram Embeds</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
       background: #000;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
     }
     
-    .video-wall {
+    .video-stack {
       width: 100%;
+      max-width: 450px; /* Instagram's natural mobile width */
+      margin: 0 auto;
     }
     
-    .video-block {
+    .video-container {
       width: 100%;
-      height: 100vh;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid #222;
+      margin-bottom: 2px;
     }
     
-    .video-embed {
-      position: absolute;
-      top: 0;
-      left: 0;
+    /* Let Instagram control the height */
+    .video-container iframe {
       width: 100%;
-      height: 100%;
+      display: block;
       border: none;
-      transform: scale(1.4); /* Default zoom (adjust this number) */
-      transform-origin: center center;
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <div class="video-wall" id="wall"></div>
+  <div class="video-stack" id="container"></div>
 
   <script>
     const posts = [
       "DGhEuVyScww",
       "DGW1LYTv-0e",
-      "DAPDdkuSSQe", 
+      "DAPDdkuSSQe",
       "DFrDvUGvrAl",
       "DBSmxXcpFX_",
       "C8DjEvjAU3e"
     ];
 
-    const wall = document.getElementById('wall');
+    const container = document.getElementById('container');
     
     posts.forEach(id => {
-      const block = document.createElement('div');
-      block.className = 'video-block';
-      
-      block.innerHTML = `
-        <iframe class="video-embed"
-                src="https://www.instagram.com/p/${id}/embed/?hide_embed=1"
+      const div = document.createElement('div');
+      div.className = 'video-container';
+      div.innerHTML = `
+        <iframe src="https://www.instagram.com/p/${id}/embed/"
                 allow="autoplay"
                 loading="lazy"
                 allowfullscreen></iframe>
       `;
-      
-      wall.appendChild(block);
+      container.appendChild(div);
     });
-
-    // Dynamic zoom adjustment
-    function adjustZoom() {
-      const embeds = document.querySelectorAll('.video-embed');
-      embeds.forEach(embed => {
-        // Reset transform first
-        embed.style.transform = 'none';
-        
-        // Wait for content to load
-        setTimeout(() => {
-          const idealScale = window.innerWidth / embed.scrollWidth;
-          embed.style.transform = `scale(${idealScale})`;
-        }, 500);
-      });
-    }
-
-    window.addEventListener('load', adjustZoom);
-    window.addEventListener('resize', adjustZoom);
   </script>
 </body>
 </html>
