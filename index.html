@@ -3,37 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proper Instagram Embeds</title>
+  <title>Instagram Video Scroll</title>
   <style>
     body {
       margin: 0;
       background: #000;
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
     }
     
-    .video-stack {
+    .video-scroll {
       width: 100%;
-      max-width: 450px; /* Instagram's natural mobile width */
+      max-width: 450px; /* Instagram's natural width */
       margin: 0 auto;
     }
     
-    .video-container {
+    .video-frame {
       width: 100%;
       margin-bottom: 2px;
     }
     
-    /* Let Instagram control the height */
-    .video-container iframe {
+    .video-frame iframe {
       width: 100%;
+      border: 0;
       display: block;
-      border: none;
+      /* Remove extra space INSIDE the iframe */
+      margin-top: -50px; 
+      margin-bottom: -50px;
+      height: calc(100% + 100px);
     }
   </style>
 </head>
 <body>
-  <div class="video-stack" id="container"></div>
+  <div class="video-scroll" id="container"></div>
 
   <script>
-    const posts = [
+    const instagramPosts = [
       "DGhEuVyScww",
       "DGW1LYTv-0e",
       "DAPDdkuSSQe",
@@ -44,16 +49,18 @@
 
     const container = document.getElementById('container');
     
-    posts.forEach(id => {
-      const div = document.createElement('div');
-      div.className = 'video-container';
-      div.innerHTML = `
-        <iframe src="https://www.instagram.com/p/${id}/embed/"
-                allow="autoplay"
+    instagramPosts.forEach(postId => {
+      const frame = document.createElement('div');
+      frame.className = 'video-frame';
+      
+      frame.innerHTML = `
+        <iframe src="https://www.instagram.com/p/${postId}/embed/"
+                allow="autoplay; encrypted-media"
                 loading="lazy"
                 allowfullscreen></iframe>
       `;
-      container.appendChild(div);
+      
+      container.appendChild(frame);
     });
   </script>
 </body>
