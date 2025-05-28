@@ -3,85 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram Video Carousel</title>
+  <title>Instagram Video Wall</title>
   <style>
-    * {
-      box-sizing: border-box;
+    body {
       margin: 0;
       padding: 0;
+      background: #000; /* Black looks better for video focus */
     }
     
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-    }
-    
-    .carousel {
+    .video-wall {
       width: 100%;
-      max-width: 600px; /* Adjust this to control max width */
+      max-width: 400px; /* Tighter than Instagram's default */
       margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px; /* Space between videos */
-      padding: 20px 0;
     }
     
-    .video-container {
+    .video-block {
       width: 100%;
-      aspect-ratio: 9/16; /* Common Instagram video ratio */
-      background: white;
-      border-radius: 8px;
+      height: 100vh; /* Full viewport height */
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+      margin-bottom: 1px; /* Hairline divider */
     }
     
-    .video-container iframe {
+    .video-block iframe {
       width: 100%;
       height: 100%;
-      border: none;
-      display: block;
+      border: 0;
+      position: absolute;
+      top: 0;
+      left: 0;
+      /* Crop off Instagram's UI */
+      transform: scale(1.15); /* Zoom into video */
+      transform-origin: center;
     }
   </style>
 </head>
 <body>
-  <div class="carousel" id="video-carousel"></div>
+  <div class="video-wall" id="wall"></div>
 
-  <!-- Instagram embed script -->
-  <script async src="https://www.instagram.com/embed.js"></script>
-  
   <script>
-    // Instagram embed URLs
-    const instagramLinks = [
-      "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
-      "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
-      "https://www.instagram.com/p/DAPDdkuSSQe/embed/?utm_source=ig_embed",
-      "https://www.instagram.com/p/DFrDvUGvrAl/embed/?utm_source=ig_embed",
-      "https://www.instagram.com/p/DBSmxXcpFX_/embed/?utm_source=ig_embed",
-      "https://www.instagram.com/p/C8DjEvjAU3e/embed/?utm_source=ig_embed"
+    const videos = [
+      "https://www.instagram.com/p/DGhEuVyScww/",
+      "https://www.instagram.com/p/DGW1LYTv-0e/",
+      "https://www.instagram.com/p/DAPDdkuSSQe/",
+      "https://www.instagram.com/p/DFrDvUGvrAl/",
+      "https://www.instagram.com/p/DBSmxXcpFX_/",
+      "https://www.instagram.com/p/C8DjEvjAU3e/"
     ];
 
-    // Create video containers
-    const carousel = document.getElementById('video-carousel');
+    const wall = document.getElementById('wall');
     
-    instagramLinks.forEach(url => {
-      const container = document.createElement('div');
-      container.className = 'video-container';
+    videos.forEach(link => {
+      const block = document.createElement('div');
+      block.className = 'video-block';
       
-      const iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
-      iframe.loading = "lazy";
-      iframe.setAttribute("allowfullscreen", "true");
+      block.innerHTML = `
+        <iframe src="${link}embed/"
+                allow="autoplay; encrypted-media"
+                allowfullscreen
+                loading="lazy"
+                style="pointer-events: none"></iframe>
+      `;
       
-      container.appendChild(iframe);
-      carousel.appendChild(container);
-    });
-
-    // Process Instagram embeds when loaded
-    window.addEventListener('load', () => {
-      if (window.instgrm && instgrm.Embeds) {
-        instgrm.Embeds.process();
-      }
+      wall.appendChild(block);
     });
   </script>
 </body>
