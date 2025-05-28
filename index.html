@@ -1,81 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Instagram Video Carousel</title>
   <style>
-    * { box-sizing: border-box; }
-    html, body {
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      height: 100vh;               /* fill the viewport */
+    }
+    
+    body {
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
     }
-    body {
-      padding: 20px;
-    }
-
-    /* —— Header —— */
-    .copy-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    #copy-ferro {
-      font-size: 24px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    /* —— Tooltip —— */
-    #tooltip {
-      position: fixed;
-      background: rgba(0,0,0,0.8);
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.05s;
-      z-index: 9999;
-      white-space: nowrap;
-    }
-
-    /* —— Vertical carousel —— */
+    
     .carousel {
-      flex: 1;                     /* fill space under header */
+      width: 100%;
+      max-width: 600px; /* Adjust this to control max width */
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      overflow-y: auto;
-      gap: 20px;                   /* peek between slides */
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+      gap: 10px; /* Space between videos */
+      padding: 20px 0;
     }
-    .carousel::-webkit-scrollbar {
-      display: none;
-    }
-
-    /* —— Video frames —— */
-    .video {
-      width: 80%;                  /* adjust width as before */
-      margin: 0 auto;
-      background-color: white;
-      border-radius: 12px;
+    
+    .video-container {
+      width: 100%;
+      aspect-ratio: 9/16; /* Common Instagram video ratio */
+      background: white;
+      border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      height: auto;                /* will be set by JS */
     }
-    @media (min-width: 800px) {
-      .video {
-        width: 40%;
-      }
-    }
-    .video iframe {
+    
+    .video-container iframe {
       width: 100%;
       height: 100%;
       border: none;
@@ -84,22 +44,13 @@
   </style>
 </head>
 <body>
-
-  <!-- 1) Header -->
-  <div class="copy-header">
-    <span id="copy-ferro">ＦＥＲＲＯ</span>
-  </div>
-
-  <!-- 2) Tooltip -->
-  <div id="tooltip">Click to Copy to Clipboard</div>
-
-  <!-- 3) Carousel -->
   <div class="carousel" id="video-carousel"></div>
 
-  <!-- Instagram embed.js -->
+  <!-- Instagram embed script -->
   <script async src="https://www.instagram.com/embed.js"></script>
+  
   <script>
-    // 1) Populate the carousel
+    // Instagram embed URLs
     const instagramLinks = [
       "https://www.instagram.com/p/DGhEuVyScww/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/DGW1LYTv-0e/embed/?utm_source=ig_embed",
@@ -108,82 +59,29 @@
       "https://www.instagram.com/p/DBSmxXcpFX_/embed/?utm_source=ig_embed",
       "https://www.instagram.com/p/C8DjEvjAU3e/embed/?utm_source=ig_embed"
     ];
+
+    // Create video containers
     const carousel = document.getElementById('video-carousel');
+    
     instagramLinks.forEach(url => {
-      const slide = document.createElement('div');
-      slide.className = 'video';
+      const container = document.createElement('div');
+      container.className = 'video-container';
+      
       const iframe = document.createElement('iframe');
       iframe.src = url;
       iframe.allow = "autoplay; clipboard-write; encrypted-media; picture-in-picture";
       iframe.loading = "lazy";
       iframe.setAttribute("allowfullscreen", "true");
-      slide.appendChild(iframe);
-      carousel.appendChild(slide);
+      
+      container.appendChild(iframe);
+      carousel.appendChild(container);
     });
 
-    // 2) Once embeds load, recalc sizes
-    function resizeSlides() {
-      // Compute how much vertical space is available
-      const headerEl = document.querySelector('.copy-header');
-      const headerHeight = headerEl.offsetHeight + 
-        parseFloat(getComputedStyle(headerEl).marginBottom);
-      const bodyStyle = getComputedStyle(document.body);
-      const bodyPadTop  = parseFloat(bodyStyle.paddingTop);
-      const bodyPadBot  = parseFloat(bodyStyle.paddingBottom);
-
-      const availHeight = window.innerHeight
-        - headerHeight
-        - bodyPadTop
-        - bodyPadBot;
-
-      // We want 1.5 slides in that space:
-      const slideHeight = availHeight / 1.5;
-
-      document.querySelectorAll('.video').forEach(slide => {
-        slide.style.height = slideHeight + 'px';
-      });
-    }
-
+    // Process Instagram embeds when loaded
     window.addEventListener('load', () => {
-      // Process Instagram embeds
       if (window.instgrm && instgrm.Embeds) {
         instgrm.Embeds.process();
       }
-      // Then size slides
-      resizeSlides();
-    });
-    window.addEventListener('resize', resizeSlides);
-
-    // 3) Copy-to-clipboard + tooltip
-    function fallbackCopy(text) {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.style.position = 'fixed';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      ta.remove();
-    }
-    const copyEl = document.getElementById('copy-ferro');
-    const tip    = document.getElementById('tooltip');
-
-    copyEl.addEventListener('click', () => {
-      const txt = 'ＦＥＲＲＯ';
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(txt).catch(() => fallbackCopy(txt));
-      } else {
-        fallbackCopy(txt);
-      }
-    });
-    copyEl.addEventListener('mouseenter', () => {
-      tip.style.opacity = '1';
-    });
-    copyEl.addEventListener('mousemove', e => {
-      tip.style.top  = (e.clientY + 10) + 'px';
-      tip.style.left = (e.clientX + 10) + 'px';
-    });
-    copyEl.addEventListener('mouseleave', () => {
-      tip.style.opacity = '0';
     });
   </script>
 </body>
